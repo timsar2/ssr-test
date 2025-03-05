@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:ssr": "ng build && node rename-for-netlify.js",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:server-side": "node dist/server-side/server/server.mjs",
