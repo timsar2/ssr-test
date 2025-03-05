@@ -11,6 +11,7 @@
     "serve:ssr:server-side": "node dist/server-side/server/server.mjs",
     "vercel:deploy": "npm run serve:ssr:server-side && vercel --prod"
   },
+  "type": "module",
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.1.0",
