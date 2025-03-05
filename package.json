@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:server-side": "node dist/server-side/server/server.mjs"
+    "serve:ssr:server-side": "node dist/server-side/server/server.mjs",
+    "vercel:deploy": "npm run serve:ssr:server-side && vercel --prod"
   },
   "private": true,
   "dependencies": {
