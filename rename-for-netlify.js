@@ -1,19 +1,19 @@
-import { rename } from 'fs'
+import { rename, existsSync } from 'fs'
 
-const distFolder = 'dist/your-app/server'
+const distFolder = 'dist/server-side'
+const filesToRename = [
+  { old: `${distFolder}/server/index.server.js`, new: `${distFolder}/server/index-server.js` },
+  { old: `${distFolder}/server/main.server.js`, new: `${distFolder}/server/main-server.js` },
+  { old: `${distFolder}/server/polyfills.server.js`, new: `${distFolder}/server/polyfills-server.js` }
+]
 
-rename(`${distFolder}/main.server.js`, `${distFolder}/main-server.js`, (err) => {
-  if (err) {
-    console.error('Error renaming file:', err)
+filesToRename.forEach(({ old, new: newPath }) => {
+  if (existsSync(old)) {
+    rename(old, newPath, (err) => {
+      if (err) console.error(`Error renaming ${old}:`, err)
+      else console.log(`Successfully renamed ${old} to ${newPath}`)
+    })
   } else {
-    console.log('Successfully renamed main.server.js to main-server.js')
+    console.error(`File not found: ${old}`)
   }
 })
-
-rename(`${distFolder}/polyfills.server.js`, `${distFolder}/polyfills-server.js`, (err) => {
-    if (err) {
-      console.error('Error renaming file:', err)
-    } else {
-      console.log('Successfully renamed polyfills.server.js to polyfills-server.js')
-    }
-  })
