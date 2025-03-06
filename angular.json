@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "server-side": {
+    "tt": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/server-side",
+            "outputPath": "dist/tt",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -35,12 +35,11 @@
               "src/styles.scss"
             ],
             "scripts": [],
-            "server": "src/main-server.ts",
+            "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
-            },
-            "prerender": false
+            }
           },
           "configurations": {
             "production": {
@@ -70,10 +69,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "server-side:build:production"
+              "buildTarget": "tt:build:production"
             },
             "development": {
-              "buildTarget": "server-side:build:development"
+              "buildTarget": "tt:build:development"
             }
           },
           "defaultConfiguration": "development"
