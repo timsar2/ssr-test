@@ -1,70 +1,68 @@
 import fs from 'fs'
 import path from 'path'
 
-// Paths to the files
-const distFolder = 'dist/server-side'
-const mainFileOld = path.join(distFolder, 'server/main.server.mjs')
-const mainFileNew = path.join(distFolder, 'server/main-server.mjs')
-const polyFileOld = path.join(distFolder, 'server/polyfills.server.mjs')
-const polyFileNew = path.join(distFolder, 'server/polyfills-server.mjs')
-const indexFileOld = path.join(distFolder, 'server/index.server.html')
-const indexFileNew = path.join(distFolder, 'server/index-server.html')
-const indexCsrFileOld = path.join(distFolder, 'browser/index.csr.html')
-const indexCsrFileNew = path.join(distFolder, 'browser/index-csr.html')
-const manifestFile = path.join(distFolder, 'server/angular-app-engine-manifest.mjs')
+const directoriesToSearch = ['dist/server-side/server', 'dist/server-side/browser']
 
-// Step 1: Rename the files
-const renameFile = (oldPath, newPath) => {
-  return new Promise((resolve, reject) => {
-    fs.rename(oldPath, newPath, (err) => {
-      if (err) {
-        reject(`Error renaming ${oldPath}: ${err}`)
-      } else {
-        resolve(`Successfully renamed ${oldPath} to ${newPath}`)
-      }
-    })
-  })
-}
-
-const updateManifest = (filePath, oldImport, newImport) => {
-  return new Promise((resolve, reject) => {
-    fs.readFile(filePath, 'utf8', (readErr, data) => {
-      if (readErr) {
-        reject(`Error reading manifest file: ${readErr}`)
-        return
-      }
-      // Update the import statement in the manifest
-      const updatedData = data.replace(oldImport, newImport)
-
-      fs.writeFile(filePath, updatedData, 'utf8', (writeErr) => {
-        if (writeErr) {
-          reject(`Error updating manifest file: ${writeErr}`)
-        } else {
-          resolve(`Successfully updated manifest file`)
-        }
-      })
-    })
-  })
-}
-
-const run = async () => {
+// Function to rename files
+const renameFilesInDirectory = (directory) => {
   try {
-    // Rename the files
-    await renameFile(mainFileOld, mainFileNew)
-    await renameFile(polyFileOld, polyFileNew)
-    await renameFile(indexFileOld, indexFileNew)
-    await renameFile(indexCsrFileOld, indexCsrFileNew)
-    console.log('Renaming completed.')
+    console.log(`Searching in directory: ${directory}`)
+    const files = fs.readdirSync(directory) // Get all files in the directory
+    console.log(`Files found in ${directory}:`, files)
 
-    // Update the manifest file
-    await updateManifest(manifestFile, './main.server.mjs', './main-server.mjs')
-    await updateManifest(manifestFile, './polyfills.server.mjs', './polyfills-server.mjs')
-    await updateManifest(manifestFile, './index.server.html', './index-server.html')
-    await updateManifest(manifestFile, './index.csr.html', './index-csr.html')
-    console.log('Manifest update completed.')
+    files.forEach(file => {
+      if (file.includes('.')) {
+        const lastDotIndex = file.lastIndexOf('.')
+        const nameWithoutExt = file.substring(0, lastDotIndex).replace(/\./g, '-') // Replace all dots except last one
+        const extension = file.substring(lastDotIndex) // Keep the last dot and extension
+        const newFileName = nameWithoutExt + extension
+
+        if (file !== newFileName) {
+          const oldPath = path.join(directory, file)
+          const newPath = path.join(directory, newFileName)
+
+          console.log(`Renaming: ${oldPath} -> ${newPath}`)
+          try {
+            fs.renameSync(oldPath, newPath)
+            console.log(`Successfully renamed: ${oldPath} -> ${newPath}`)
+          } catch (err) {
+            console.error(`Error renaming ${oldPath} to ${newPath}:`, err)
+          }
+        }
+      }
+    })
   } catch (err) {
-    console.error(err)
+    console.error(`Error reading directory ${directory}:`, err)
   }
 }
 
-run()
+// Function to update file contents
+const updateFileContents = (directory) => {
+  try {
+    console.log(`Updating file contents in directory: ${directory}`)
+    const files = fs.readdirSync(directory).filter(file => file.endsWith('.mjs')) // Only .mjs files
+
+    files.forEach(file => {
+      const filePath = path.join(directory, file)
+      let content = fs.readFileSync(filePath, 'utf-8')
+
+      let updatedContent = content.replace(/\b([\w-]+)\.server\b/g, '$1-server')
+      updatedContent = updatedContent.replace(/\b([\w-]+)\.csr\b/g, '$1-csr')
+      updatedContent = updatedContent.replace(/\b([\w-]+)\.polyfills\b/g, '$1-polyfills')
+
+      if (content !== updatedContent) {
+        fs.writeFileSync(filePath, updatedContent, 'utf-8')
+        console.log(`Updated content in: ${filePath}`)
+      }
+    })
+  } catch (err) {
+    console.error(`Error updating files in directory ${directory}:`, err)
+  }
+}
+
+// Process all directories
+directoriesToSearch.forEach(directory => {
+  console.log(`\nStarting renaming process in: ${directory}`)
+  renameFilesInDirectory(directory)
+  updateFileContents(directory)
+})
